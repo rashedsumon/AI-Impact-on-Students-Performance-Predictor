@@ -8,35 +8,29 @@ from data_loader import load_student_dataset
 
 def build_and_train_pipeline():
     """
-    Loads raw data, splits features, applies basic preprocessing,
+    Loads raw data, selects a strictly controlled set of user-interactive features,
     and returns a fitted machine learning training Pipeline object.
     """
-    # Load dataset through data_loader script
     df = load_student_dataset()
-    
-    # Define features (X) and target label (y) based on dataset columns
-    # We will predict Post_Semester_GPA
-    # Define features (X) and target label (y) based on dataset columns
     target = 'Post_Semester_GPA'
     
-    # EXPLICIT FIX: Drop all metrics/targets that aren't collected from the Streamlit UI
-    ignore_cols = [
-        target, 
-        'Student_ID', 
-        'Skill_Retention_Score', 
-        'Burnout_Risk_Level'
+    # CRITICAL FIX: Explicitly define the features we collect from the UI.
+    # This prevents any unexpected dataset columns from crashing the app.
+    feature_cols = [
+        'Major_Category', 'Year_of_Study', 'Pre_Semester_GPA', 
+        'Weekly_GenAI_Hours', 'Primary_Use_Case', 'Prompt_Engineering_Skill', 
+        'Tool_Diversity', 'Paid_Subscription', 'Traditional_Study_Hours', 
+        'Perceived_AI_Dependency', 'Anxiety_Level_During_Exams'
     ]
     
-    # Filter down safely to ensure no KeyErrors if columns are missing
-    cols_to_drop = [col for col in ignore_cols if col in df.columns]
-    X = df.drop(columns=cols_to_drop)
+    X = df[feature_cols]
     y = df[target]
     
     # Isolate feature columns by type
     categorical_cols = X.select_dtypes(include=['object', 'category', 'bool']).columns.tolist()
     numerical_cols = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
     
-    # Use Ordinal Encoder for user categories (e.g., Major, Skill level, Use case)
+    # Preprocessor configuration
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', 'passthrough', numerical_cols),
@@ -52,15 +46,7 @@ def build_and_train_pipeline():
     # Split into train/test sets to evaluate execution score
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    print("Training model pipeline... (this might take a few moments)")
+    print("Training model pipeline...")
     model_pipeline.fit(X_train, y_train)
     
-    train_score = model_pipeline.score(X_train, y_train)
-    test_score = model_pipeline.score(X_test, y_test)
-    print(f"Model Training Complete! Train R²: {train_score:.2f} | Test R²: {test_score:.2f}")
-    
     return model_pipeline, X
-
-if __name__ == "__main__":
-    # Test file execution standalone
-    build_and_train_pipeline()
