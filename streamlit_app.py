@@ -51,9 +51,7 @@ if pipeline is not None and X_raw is not None:
         ai_dep = st.slider("Perceived AI Dependency Scale", min_value=1, max_value=10, value=4)
         anxiety = st.slider("Anxiety Level During Exams", min_value=1, max_value=10, value=4)
 
-    # Compile the selected inputs into a singular row dataframe match-ready for prediction pipeline
     # 1. Map your Streamlit UI variables to a dictionary using the EXACT dataset column keys
-    # Double-check the string keys below against your specific dataset column names if you still face errors.
     user_inputs = {
         'Major_Category': major,
         'Year_of_Study': year,
@@ -72,7 +70,7 @@ if pipeline is not None and X_raw is not None:
     input_data = pd.DataFrame([user_inputs])
 
     # 3. CRITICAL FIX: Reorder columns to match exactly how the model was trained
-    # This prevents the "columns are missing / mismatched" error
+    # This prevents any "columns are missing / mismatched" error
     input_data = input_data[X_raw.columns]
 
     st.write("---")
