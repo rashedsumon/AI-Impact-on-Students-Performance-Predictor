@@ -1,0 +1,11 @@
+# Ignore local Python cache and virtual environments
+__pycache__/
+*.pyc
+.venv/
+env/
+
+# Ignore Kaggle cache and downloaded raw dataset files
+.kagglehub/
+~/.cache/kagglehub/
+ai_student_impact_dataset*.csv
+*.pkl
