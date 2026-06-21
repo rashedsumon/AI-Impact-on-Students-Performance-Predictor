@@ -16,14 +16,20 @@ def build_and_train_pipeline():
     
     # Define features (X) and target label (y) based on dataset columns
     # We will predict Post_Semester_GPA
+    # Define features (X) and target label (y) based on dataset columns
     target = 'Post_Semester_GPA'
     
-    # Ensure standard expected column drops if matching Kaggle dataset syntax
-    ignore_cols = [target]
-    if 'Student_ID' in df.columns:
-        ignore_cols.append('Student_ID')
-        
-    X = df.drop(columns=ignore_cols)
+    # EXPLICIT FIX: Drop all metrics/targets that aren't collected from the Streamlit UI
+    ignore_cols = [
+        target, 
+        'Student_ID', 
+        'Skill_Retention_Score', 
+        'Burnout_Risk_Level'
+    ]
+    
+    # Filter down safely to ensure no KeyErrors if columns are missing
+    cols_to_drop = [col for col in ignore_cols if col in df.columns]
+    X = df.drop(columns=cols_to_drop)
     y = df[target]
     
     # Isolate feature columns by type
